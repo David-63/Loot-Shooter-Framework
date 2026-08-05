@@ -1,0 +1,17 @@
+{
+    "name": "Dave6.LootShooter.Sample.Networking",
+    "rootNamespace": "",
+    "references": [
+        "GUID:80c7d8d18b3c0314b800067507da951d",
+        "GUID:1491147abca9d7d4bb7105af628b223e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

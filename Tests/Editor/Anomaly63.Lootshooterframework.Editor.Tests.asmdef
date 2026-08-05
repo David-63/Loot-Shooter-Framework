@@ -1,0 +1,14 @@
+{
+    "name": "Anomaly63.Lootshooterframework.Editor.Tests",
+    "references": [
+        "Anomaly63.Lootshooterframework.Editor",
+        "Anomaly63.Lootshooterframework"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

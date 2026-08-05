@@ -1,0 +1,10 @@
+{
+    "name": "Anomaly63.Lootshooterframework.Editor",
+    "references": [
+      "Anomaly63.Lootshooterframework"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

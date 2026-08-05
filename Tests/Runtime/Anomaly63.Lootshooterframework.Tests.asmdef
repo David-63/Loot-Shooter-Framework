@@ -1,0 +1,11 @@
+{
+    "name": "Anomaly63.Lootshooterframework.Tests",
+    "references": [
+        "Anomaly63.Lootshooterframework"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}
