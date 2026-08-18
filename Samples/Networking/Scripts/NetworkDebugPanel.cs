@@ -7,7 +7,7 @@ namespace Dave6.LootShooter.Samples.Networking.UI
 {
     public class NetworkDebugPanel : MonoBehaviour
     {
-        [SerializeField] NetworkBootstrap _Bootstrap;
+        NetworkBootstrap _Bootstrap;
         NetworkSessionController _Session;
 
         Button _HostButton;
@@ -17,7 +17,9 @@ namespace Dave6.LootShooter.Samples.Networking.UI
 
         void OnEnable()
         {
+            _Bootstrap = GetComponent<NetworkBootstrap>();
             _Bootstrap.OnReady += BindSession;
+            if (_Bootstrap.IsReady) BindSession();
         }
         void OnDisable()
         {

@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace Dave6.LootShooter.Networking.Session
 {
@@ -69,6 +70,13 @@ namespace Dave6.LootShooter.Networking.Session
         }
         void HandleClientConnected(ulong clientId)
         {
+            Debug.Log(
+            $"[NetworkSession] ClientConnected | " +
+            $"ClientId={clientId} | " +
+            $"LocalClientId={_NetworkManager.LocalClientId} | " +
+            $"IsServer={_NetworkManager.IsServer} | " +
+            $"IsClient={_NetworkManager.IsClient} | " +
+            $"IsHost={_NetworkManager.IsHost}");
             OnClientJoined?.Invoke(clientId);
             if (clientId == _NetworkManager.LocalClientId)
             {

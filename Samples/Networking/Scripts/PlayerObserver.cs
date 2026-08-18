@@ -9,11 +9,12 @@ namespace Dave6.LootShooter.Samples.Networking.Observer
 {
     public class PlayerObserver : MonoBehaviour
     {
-        [SerializeField] NetworkBootstrap _Bootstrap;
+        NetworkBootstrap _Bootstrap;
         PlayerRuntime _PlayerRuntime;
 
         void OnEnable()
         {
+            _Bootstrap = GetComponent<NetworkBootstrap>();
             _Bootstrap.OnReady += Bind;
         }
         void OnDisable()

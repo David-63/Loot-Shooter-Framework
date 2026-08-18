@@ -9,6 +9,9 @@ namespace Dave6.LootShooter.Networking.Spawn
 {
     /// <summary>
     /// Network Object 생성/제거 담당
+    /// 
+    /// 서버에서 플레이어를 생성하는 책임만 담당
+    /// 누가 생성했는지는 Player Runtime 클래스가 수행해야함
     /// </summary>
     public class PlayerSpawnService : IDisposable
     {
@@ -38,32 +41,33 @@ namespace Dave6.LootShooter.Networking.Spawn
         {
             if (!_NetworkManager.IsServer) return;
 
-            var obj = UnityEngine.Object.Instantiate(_PlayerPrefab);
-            var player = obj.GetComponent<PlayerNetworkController>(); // 나중에 참조를 위한 Root컴포넌트를 추가할 예정
+            Debug.Log(
+            $"[PlayerSpawn] SpawnPlayer BEGIN | " +
+            $"ClientId={clientId} | " +
+            $"IsServer={_NetworkManager.IsServer}");
 
-            player.Spawned += HandlePlayerSpawn;
-            player.Despawned += HandlePlayerDespawn;
+            var obj = UnityEngine.Object.Instantiate(_PlayerPrefab);
+
+            Debug.Log(
+            $"[PlayerSpawn] Instantiate | " +
+            $"Object={obj.name} | " +
+            $"ClientId={clientId}");
 
             obj.SpawnAsPlayerObject(clientId);
+
+            Debug.Log(
+            $"[PlayerSpawn] SpawnAsPlayerObject COMPLETE | " +
+            $"Object={obj.name} | " +
+            $"NetworkObjectId={obj.NetworkObjectId} | " +
+            $"OwnerClientId={obj.OwnerClientId}");
         }
         public void DespawnPlayer(ulong clientId)
         {
             if (!_NetworkManager.IsServer) return;
+
             if (!_PlayerRuntime.Players.TryGetValue(clientId, out var player)) return;
 
             player.NetworkObject.Despawn(true);
-        }
-
-        void HandlePlayerSpawn(PlayerNetworkController player)
-        {
-            player.Spawned -= HandlePlayerSpawn;
-            _PlayerRuntime.Register(player);
-        }
-
-        void HandlePlayerDespawn(PlayerNetworkController player)
-        {
-            player.Despawned -= HandlePlayerDespawn;
-            _PlayerRuntime.Unregister(player);
         }
     }
 }

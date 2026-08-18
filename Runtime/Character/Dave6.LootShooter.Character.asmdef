@@ -1,0 +1,16 @@
+{
+    "name": "Dave6.LootShooter.Character",
+    "rootNamespace": "Dave6.LootShooter.Character",
+    "references": [
+        "GUID:602cb22cb6f446e49b1db155593249d0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

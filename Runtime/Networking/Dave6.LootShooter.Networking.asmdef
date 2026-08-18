@@ -1,8 +1,11 @@
 {
     "name": "Dave6.LootShooter.Networking",
-    "rootNamespace": "",
+    "rootNamespace": "Dave6.LootShooter.Networking",
     "references": [
-        "GUID:1491147abca9d7d4bb7105af628b223e"
+        "GUID:1491147abca9d7d4bb7105af628b223e",
+        "GUID:8512f3c80a466ad4081dad53e22dc793",
+        "GUID:669216eba1415c243a862d6e828a5c1d",
+        "GUID:79e2a49bcb1ab2842b7dc15cdaba5147"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
