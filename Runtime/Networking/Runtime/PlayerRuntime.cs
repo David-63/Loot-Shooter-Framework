@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Dave6.LootShooter.Camera;
+using Dave6.LootShooter.Character;
 using Dave6.LootShooter.Input;
 using Dave6.LootShooter.Networking.Player;
-using Dave6.LootShooter.Networking.Session;
-using Dave6.LootShooter.Samples.Character;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace Dave6.LootShooter.Networking.Runtime
@@ -113,7 +111,7 @@ namespace Dave6.LootShooter.Networking.Runtime
             $"[PlayerRuntime] BindLocalPlayer BEGIN | " +
             $"Player={player.name} | " +
             $"Owner={player.OwnerClientId}");
-            var character = player.GetComponent<PrototypeCharacterController>();
+            var character = player.GetComponent<CharacterAgent>();
             if (character == null)
             {
                 Debug.LogError("Can not find CharacterController.");
@@ -131,6 +129,7 @@ namespace Dave6.LootShooter.Networking.Runtime
             $"Player={player.name}");
             _LocalCamera.Initialize(_CharacterInput);
             _LocalCamera.SetCameraTarget(player.FollowTarget);
+            player.SetLocalPlayer();
 
             LocalPlayer = player;
 

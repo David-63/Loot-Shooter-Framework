@@ -30,7 +30,6 @@ namespace Dave6.LootShooter.Samples.Character
             Vector2 input = _Input.Move;
             Vector3 forward = _Camera.Forward;
             Vector3 right = _Camera.Right;
-            // 카메라의 상하 회전은 이동 방향에 영향을 주지 않음
             forward.y = 0f;
             right.y = 0f;
             forward.Normalize();
@@ -46,23 +45,7 @@ namespace Dave6.LootShooter.Samples.Character
             float speed = isPressed ? (_Input.Sprint.IsPressed ? 5.5f : 2f) : 0;
             _Motor.SetTargetSpeed(speed);
             if (_Input.Jump.WasPressedThisFrame) _Motor.TryJump();
-            // Vector3 velocity = direction * speed;
-            // _CharacterController.Move( velocity * Time.deltaTime );
         }
-        // void ApplyGravity()
-        // {
-        //     if (_Input.Jump.WasPressedThisFrame) Debug.Log($"Jump Input! Grounded: {_CharacterController.isGrounded}");
-        //     if (_CharacterController.isGrounded)
-        //     {
-        //         if (_VerticalVelocity < 0f) _VerticalVelocity = -2f;
-        //         if (_Input.Jump.WasPressedThisFrame)
-        //         {
-        //             _VerticalVelocity = Mathf.Sqrt( _JumpHeight * -2f * _Gravity );
-        //         }
-        //     }
-        //     _VerticalVelocity += _Gravity * Time.deltaTime;
-        //     _CharacterController.Move( Vector3.up * _VerticalVelocity * Time.deltaTime );
-        // }
         void Actions()
         {
             if (_Input.Fire.WasReleasedThisFrame) Debug.Log($"Release Attack");

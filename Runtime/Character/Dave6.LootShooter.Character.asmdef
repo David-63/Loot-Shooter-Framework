@@ -2,7 +2,9 @@
     "name": "Dave6.LootShooter.Character",
     "rootNamespace": "Dave6.LootShooter.Character",
     "references": [
-        "GUID:602cb22cb6f446e49b1db155593249d0"
+        "GUID:602cb22cb6f446e49b1db155593249d0",
+        "GUID:8512f3c80a466ad4081dad53e22dc793",
+        "GUID:669216eba1415c243a862d6e828a5c1d"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

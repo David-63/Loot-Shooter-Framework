@@ -71,6 +71,7 @@ namespace Dave6.LootShooter.Camera
             _ThirdPersonFollow.CameraDistance = _CameraContext.TargetPreset.Distance;
             _ThirdPersonFollow.CameraSide = _CameraContext.TargetPreset.SideLength;
             _ThirdPersonFollow.AvoidObstacles.Enabled = true;
+            _ThirdPersonFollow.AvoidObstacles.IgnoreTag = "LocalPlayer";
         }
 
         public void SetCameraTarget(Transform followTarget)

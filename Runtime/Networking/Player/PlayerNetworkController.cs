@@ -37,5 +37,10 @@ namespace Dave6.LootShooter.Networking.Player
             var bootstrap = FindAnyObjectByType<NetworkBootstrap>();
             bootstrap.Player.Unregister(this);
         }
+
+        public void SetLocalPlayer()
+        {
+            gameObject.tag = "LocalPlayer";
+        }
     }
 }
