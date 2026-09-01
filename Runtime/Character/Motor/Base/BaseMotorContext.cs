@@ -20,5 +20,10 @@ namespace Dave6.LootShooter.Character.Motor
         // Movement
         public Vector3 MoveDirection;
         public Vector3 Velocity;
+
+
+        // Rotation
+        public float CurrentYaw;
+        public float TargetYaw;
     }
 }

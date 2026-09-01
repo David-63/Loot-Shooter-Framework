@@ -11,17 +11,20 @@ namespace Dave6.LootShooter.Networking.Runtime
     {
         public NetworkSessionController Session { get; }
         public PlayerRuntime Player { get; }
-        public PlayerSpawnService Spawn { get; }
-        public NetworkRuntime(NetworkManager manager, NetworkObject prefab, ICharacterInput input, ThirdPersonCamera camera)
+        public PlayerSpawnService SpawnPlayer { get; }
+        public ProjectileSpawnService SpawnProjectile { get; }
+        public NetworkRuntime(NetworkManager manager, NetworkObject player, NetworkObject projectile, ICharacterInput input, ThirdPersonCamera camera)
         {
             Session = new NetworkSessionController(manager);
-            Player = new PlayerRuntime(input, camera);
-            Spawn = new PlayerSpawnService(manager, prefab, Session, Player);
+            SpawnProjectile = new ProjectileSpawnService(projectile);
+
+            Player = new PlayerRuntime(input, camera, SpawnProjectile);
+            SpawnPlayer = new PlayerSpawnService(manager, player, Session, Player);
         }
 
         public void Dispose()
         {
-            Spawn.Dispose();
+            SpawnPlayer.Dispose();
             Player.Dispose();
             Session.Dispose();
         }

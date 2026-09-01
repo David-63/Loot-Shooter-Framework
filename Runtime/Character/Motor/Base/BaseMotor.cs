@@ -13,12 +13,13 @@ namespace Dave6.LootShooter.Character.Motor
         protected BaseMotorConfig _Config;
 
         CharacterController _Controller;
-        PhysicsSensor _GroundSensor;
+        public PhysicsSensor GroundSensor { get; private set; }
 
         public bool IsGrounded => _Context.IsGrounded;
         public float HorizontalSpeed => _Context.HorizontalSpeed;
         public float VerticalSpeed => _Context.VerticalSpeed;
         public Vector3 Velocity => _Context.Velocity;
+        public float CurrentYaw => _Context.CurrentYaw;
 
         protected virtual void Awake()
         {
@@ -40,7 +41,6 @@ namespace Dave6.LootShooter.Character.Motor
 
         void InitializeCharacterController()
         {
-            //_Controller ??= gameObject.AddComponent<CharacterController>();
             _Controller = GetComponent<CharacterController>();
 
             _Controller.height = _Config.Height;
@@ -54,34 +54,39 @@ namespace Dave6.LootShooter.Character.Motor
 
         void InitializeGroundSensor()
         {
-            _GroundSensor = new PhysicsSensor(transform)
+            GroundSensor = new PhysicsSensor(transform)
             {
                 Radius = _Config.Radius,
                 LayerMask = ~0,
                 TriggerInteraction = QueryTriggerInteraction.Ignore
             };
-            _GroundSensor.SetDirection(Vector3.down);
+            GroundSensor.SetDirection(Vector3.down);
         }
         protected virtual void Simulate(float deltaTime)
         {
-            UpdateGrounded();
+            _Action.UpdateGrounded(this, _Controller, _Context);
 
             _Action.UpdateGravity(_Context, deltaTime);
             _Action.UpdateSpeed(_Context, deltaTime);
+            _Action.UpdateRotation(_Controller, _Context, deltaTime);
             _Action.UpdateVelocity(_Context);
 
             _Controller.Move(_Context.Velocity * deltaTime);
         }
-        void UpdateGrounded()
-        {
-            _GroundSensor.SetOrigin(_Controller.bounds.center);
-            _GroundSensor.Length = _Controller.height * 0.5f - _Controller.radius * 0.05f;
-            _Context.IsGrounded = _GroundSensor.Cast();
-        }
 
+        #region Motor API
         public void SetMoveDirection(Vector3 direction)
         {
-            _Context.MoveDirection = Vector3.ClampMagnitude(direction, 1f);
+            if (direction.sqrMagnitude <= 0.0001f)
+            {
+                _Context.MoveDirection = Vector3.zero;
+                return;
+            }
+            _Context.MoveDirection = direction.normalized;
+        }
+        public void SetTargetYaw(float yaw)
+        {
+            _Context.TargetYaw = yaw;
         }
 
         public void SetTargetSpeed(float speed)
@@ -96,6 +101,7 @@ namespace Dave6.LootShooter.Character.Motor
             _Action.Jump(_Context);
             return true;
         }
+        #endregion
     }
 
     /*
@@ -118,13 +124,13 @@ namespace Dave6.LootShooter.Character.Motor
         }
         protected virtual void RecalibrateGroundSensor()
         {
-            _GroundSensor.Radius = _Config.Radius;
+            GroundSensor.Radius = _Config.Radius;
 
-            _GroundSensor.SetOrigin(_Controller.bounds.center);
-            _GroundSensor.SetDirection(Vector3.down);
+            GroundSensor.SetOrigin(_Controller.bounds.center);
+            GroundSensor.SetDirection(Vector3.down);
 
-            _GroundSensor.Length = _Config.Height * (0.5f - _Config.StepHeightRatio) + _Config.Height * _Config.StepHeightRatio;
-            _GroundSensor.LayerMask = BuildCollisionMask();
+            GroundSensor.Length = _Config.Height * (0.5f - _Config.StepHeightRatio) + _Config.Height * _Config.StepHeightRatio;
+            GroundSensor.LayerMask = BuildCollisionMask();
         }
         LayerMask BuildCollisionMask()
         {

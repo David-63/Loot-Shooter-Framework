@@ -1,5 +1,5 @@
 using Dave6.LootShooter.Camera;
-using Dave6.LootShooter.Character.Motor;
+using Dave6.LootShooter.Character.Network;
 using Dave6.LootShooter.Character.States;
 using Dave6.LootShooter.Foundation.State;
 using Dave6.LootShooter.Input;
@@ -11,23 +11,26 @@ namespace Dave6.LootShooter.Character
     {
         [SerializeField] bool _DebugStateMachine;
         ICharacterInput _Input;
-        ThirdPersonCamera _Camera;
-        BaseMotor _Motor;
-        StateMachine _LocomotionSM;
-
         public ICharacterInput Input { get => _Input; }
+        NetworkAgent _NetworkAgent;
+        public NetworkAgent Network => _NetworkAgent;
+        ThirdPersonCamera _Camera;
         public ThirdPersonCamera Camera => _Camera;
-        public BaseMotor Motor => _Motor;
-        
 
-        public void Initialize(ICharacterInput input, ThirdPersonCamera camera)
+        CharacterComponentManager _Components;
+
+        StateMachine _ActionSM;
+
+        public void Initialize(ICharacterInput input, ThirdPersonCamera camera, ICharacterNetwork network)
         {
             _Input = input;
             _Camera = camera;
+            _NetworkAgent = new();
+            _NetworkAgent.Initialize(network);
         }
         void Awake()
         {
-            _Motor = GetComponent<BaseMotor>();
+            _Components = new CharacterComponentManager(this);
         }
 
         void Start()
@@ -42,57 +45,22 @@ namespace Dave6.LootShooter.Character
         */
         void SetupStateMachine()
         {
-            _LocomotionSM = new();
+            _ActionSM = new();
+            var idle = new IdleState(this);
+            var fire = new FireState(this);
+            _ActionSM.Any(fire, new FuncPredicate(()=> Input.Fire.IsPressed));
+            _ActionSM.At(fire, idle, new FuncPredicate(()=> Input.Fire.WasReleasedThisFrame));
 
-            var freelook = new FreeLookState(this);
-            var strafe = new StrafeState(this);
-
-            _LocomotionSM.At(freelook, strafe, new FuncPredicate(()=> Input.Aim.IsPressed));
-            _LocomotionSM.At(strafe, freelook, new FuncPredicate(()=> !Input.Aim.IsPressed));
-            _LocomotionSM.SetState(_LocomotionSM.GetStateByType(typeof(FreeLookState)));
-            
-            if (_DebugStateMachine) _LocomotionSM.SetDebug(_DebugStateMachine);
-
+            _ActionSM.SetState(_ActionSM.GetStateByType(typeof(IdleState)));
+            if (_DebugStateMachine) _ActionSM.SetDebug(_DebugStateMachine);
         }
         void Update()
         {
             if (_Input == null || _Camera == null) return;
-            //Move();
-            //Actions();
-            _LocomotionSM.Update();
+            _Components.OnUpdate();
+            //_LocomotionSM.Update();
+            //_ActionSM.Update();
         }
-        void Move()
-        {
-            Vector2 input = _Input.Move;
-            Vector3 forward = _Camera.Forward;
-            Vector3 right = _Camera.Right;
-            forward.y = 0f;
-            right.y = 0f;
-            forward.Normalize();
-            right.Normalize();
-            Vector3 direction = forward * input.y + right * input.x;
-
-            if (direction.sqrMagnitude > 0f) direction.Normalize();
-            _Motor.SetMoveDirection(direction);
-
-            bool isPressed = input.sqrMagnitude > 0f;
-            // if (isPressed) Debug.Log("이동 키 눌림");
-
-            float speed = isPressed ? (_Input.Sprint.IsPressed ? 5.5f : 2f) : 0;
-            _Motor.SetTargetSpeed(speed);
-            if (_Input.Jump.WasPressedThisFrame) _Motor.TryJump();
-        }
-        void Actions()
-        {
-            if (_Input.Fire.WasReleasedThisFrame) Debug.Log($"Release Attack");
-            if (_Input.Crouch.WasReleasedThisFrame) Debug.Log($"Release Crouch");
-        }
-    }
-    public interface IMovementPolicy
-    {
-        Vector3 ResolveMoveDirection();
-        float ResolveSpeed();
-        Vector3 ResolveFacing();
     }
     public readonly struct MoverFrameInput
     {

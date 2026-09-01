@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Dave6.LootShooter.Camera;
 using Dave6.LootShooter.Character;
 using Dave6.LootShooter.Input;
-using Dave6.LootShooter.Networking.Player;
+using Dave6.LootShooter.Networking.Object;
+using Dave6.LootShooter.Networking.Spawn;
 using UnityEngine;
 
 namespace Dave6.LootShooter.Networking.Runtime
@@ -15,6 +16,7 @@ namespace Dave6.LootShooter.Networking.Runtime
     {
         ICharacterInput _CharacterInput;
         ThirdPersonCamera _LocalCamera;
+        ProjectileSpawnService _ProjectileService;
 
         readonly Dictionary<ulong, PlayerNetworkController> _Players = new();
         public IReadOnlyDictionary<ulong, PlayerNetworkController> Players => _Players;
@@ -26,10 +28,11 @@ namespace Dave6.LootShooter.Networking.Runtime
         public event Action<PlayerNetworkController> OnPlayerRegistered;
         public event Action<PlayerNetworkController> OnPlayerUnregistered;
 
-        public PlayerRuntime(ICharacterInput input, ThirdPersonCamera camera)
+        public PlayerRuntime(ICharacterInput input, ThirdPersonCamera camera, ProjectileSpawnService projectileService)
         {
             _CharacterInput = input;
             _LocalCamera = camera;
+            _ProjectileService = projectileService;
         }
 
         public void Dispose()
@@ -39,12 +42,6 @@ namespace Dave6.LootShooter.Networking.Runtime
         }
         public void Register(PlayerNetworkController player)
         {
-            Debug.Log(
-            $"[PlayerRuntime] Register BEGIN | " +
-            $"Player={player.name} | " +
-            $"Owner={player.OwnerClientId} | " +
-            $"Local={player.NetworkManager.LocalClientId} | " +
-            $"IsOwner={player.IsOwner}");
             if (_Players.ContainsKey(player.OwnerClientId))
             {
                 Debug.LogWarning(
@@ -55,11 +52,7 @@ namespace Dave6.LootShooter.Networking.Runtime
             }
             _Players[player.OwnerClientId] = player;
 
-            Debug.Log(
-            $"[PlayerRuntime] Registered | " +
-            $"Player={player.name} | " +
-            $"Owner={player.OwnerClientId} | " +
-            $"PlayerCount={_Players.Count}");
+            player.Initialize(_ProjectileService);
 
             if (player.IsOwner)
             {
@@ -75,10 +68,6 @@ namespace Dave6.LootShooter.Networking.Runtime
 
         public void Unregister(PlayerNetworkController player)
         {
-            Debug.Log(
-            $"[PlayerRuntime] Unregister BEGIN | " +
-            $"Player={player.name} | " +
-            $"Owner={player.OwnerClientId}");
             if (!_Players.Remove(player.OwnerClientId))
             {
                 Debug.LogWarning(
@@ -97,20 +86,11 @@ namespace Dave6.LootShooter.Networking.Runtime
                 UnbindLocalPlayer();
             }
 
-            Debug.Log(
-            $"[PlayerRuntime] Unregistered | " +
-            $"Player={player.name} | " +
-            $"RemainingPlayers={_Players.Count}");
-
             OnPlayerUnregistered?.Invoke(player);
         }
 
         public void BindLocalPlayer(PlayerNetworkController player)
         {
-            Debug.Log(
-            $"[PlayerRuntime] BindLocalPlayer BEGIN | " +
-            $"Player={player.name} | " +
-            $"Owner={player.OwnerClientId}");
             var character = player.GetComponent<CharacterAgent>();
             if (character == null)
             {
@@ -122,21 +102,12 @@ namespace Dave6.LootShooter.Networking.Runtime
                 Debug.LogError("Camera is not assigned.");
                 return;
             }
-
-            character.Initialize(_CharacterInput, _LocalCamera);
-            Debug.Log(
-            $"[PlayerRuntime] Character Initialized | " +
-            $"Player={player.name}");
+            character.Initialize(_CharacterInput, _LocalCamera, player);
             _LocalCamera.Initialize(_CharacterInput);
             _LocalCamera.SetCameraTarget(player.FollowTarget);
             player.SetLocalPlayer();
 
             LocalPlayer = player;
-
-            Debug.Log(
-            $"[PlayerRuntime] BindLocalPlayer COMPLETE | " +
-            $"LocalPlayer={LocalPlayer.name} | " +
-            $"CameraTarget={_LocalCamera.Target.name}");
         }
         public void UnbindLocalPlayer()
         {

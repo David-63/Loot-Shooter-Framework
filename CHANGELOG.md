@@ -1,16 +1,16 @@
 # Changelog
 
-## 0.1.0
+## 0.0.1
 
 ### Added
 
-* Initial package structure
-* Networking runtime foundation
-* Network session controller
-* Player runtime management
-* Player spawn service
-* Network debugging sample UI
+* Character movement architecture
+* Character movement component
+* Movement ability system
+* Movement policy system
+* FreeLook and Strafe movement policies
+* Character rotation handling through motor
 
 ### Notes
 
-This version establishes the basic multiplayer infrastructure for future gameplay systems.
+This version establishes the character movement architecture using abilities and movement policies, separating movement decisions from motor execution and allowing different movement modes to share the same movement ability.

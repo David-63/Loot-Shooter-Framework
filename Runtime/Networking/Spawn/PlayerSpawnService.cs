@@ -1,5 +1,4 @@
 using System;
-using Dave6.LootShooter.Networking.Player;
 using Dave6.LootShooter.Networking.Runtime;
 using Dave6.LootShooter.Networking.Session;
 using Unity.Netcode;

@@ -1,6 +1,6 @@
 
 using Dave6.LootShooter.Networking.Bootstrap;
-using Dave6.LootShooter.Networking.Player;
+using Dave6.LootShooter.Networking.Object;
 using Dave6.LootShooter.Networking.Runtime;
 using Unity.Netcode;
 using UnityEngine;

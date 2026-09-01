@@ -1,7 +1,7 @@
 using System;
 using Dave6.LootShooter.Camera;
 using Dave6.LootShooter.Input;
-using Dave6.LootShooter.Networking.Player;
+using Dave6.LootShooter.Networking.Object;
 using Dave6.LootShooter.Networking.Runtime;
 using Dave6.LootShooter.Networking.Session;
 using Unity.Netcode;
@@ -21,6 +21,7 @@ namespace Dave6.LootShooter.Networking.Bootstrap
         public bool IsReady { get; private set; }
 
         [SerializeField] NetworkObject _PlayerPrefab;
+        [SerializeField] NetworkObject _ProjectilePrefab;
         [SerializeField] ThirdPersonCamera _FollowCamera;
 
         void Awake()
@@ -43,7 +44,7 @@ namespace Dave6.LootShooter.Networking.Bootstrap
             }
 
             _InputRuntime = new InputRuntime();
-            _NetworkRuntime = new NetworkRuntime(networkManager, _PlayerPrefab, _InputRuntime.Character, _FollowCamera);
+            _NetworkRuntime = new NetworkRuntime(networkManager, _PlayerPrefab, _ProjectilePrefab, _InputRuntime.Character, _FollowCamera);
             _NetworkRuntime.Player.OnPlayerRegistered += HandlePlayerRegistered;
             OnReady?.Invoke();
             IsReady = true;
