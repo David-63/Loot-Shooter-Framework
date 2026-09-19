@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Dave6.LootShooter.Camera;
 using Dave6.LootShooter.Character.Motor;
 using Dave6.LootShooter.Character.Movement.Ability;
+using Dave6.LootShooter.Character.Movement.Policy;
 using Dave6.LootShooter.Character.Movement.States;
 using Dave6.LootShooter.Foundation.State;
-using Dave6.LootShooter.Input;
+using UnityEngine;
 
 namespace Dave6.LootShooter.Character.Movement
 {
@@ -17,9 +17,12 @@ namespace Dave6.LootShooter.Character.Movement
     public sealed class CharacterMovement
     {
         readonly CharacterAgent _Agent;
-        public CharacterAgent Agent => _Agent;
-        public ICharacterInput Input => _Agent.Input;
-        public ThirdPersonCamera Camera => _Agent.Camera;
+        public Transform Model => _Agent.Model;
+
+        // 모듈식 기능
+        readonly List<IMovementAbility> _Abilities = new();
+
+        PlayerInputData _CurrentInput;
 
         // 계산 컴포넌트
         readonly BaseMotor _Motor;
@@ -43,8 +46,11 @@ namespace Dave6.LootShooter.Character.Movement
             };
         }
 
-        // 모듈식 기능
-        readonly List<IMovementAbility> _Abilities = new();
+        public Vector3 Forward => _Agent.transform.forward;
+        public Vector3 Right => _Agent.transform.right;
+
+
+        CrouchAbility _CrouchAbility;
 
 
         public CharacterMovement(CharacterAgent agent, BaseMotor motor)
@@ -59,32 +65,45 @@ namespace Dave6.LootShooter.Character.Movement
             SetupStateMachine();
         }
 
-        public void OnUpdate()
+        public void OnUpdate(PlayerInputData input, float deltaTime)
         {
+            _CurrentInput = input;
             _Locomotion.Update();
 
             foreach (var ability in _Abilities)
             {
-                ability.Execute();
+                ability.Execute(input);
             }
+
+            _Motor.Simulate(deltaTime);
         }
 
         void SetupAbilities()
         {
             _Abilities.Add(new MoveAbility(this));
             _Abilities.Add(new JumpAbility(this));
+
+            _CrouchAbility = new CrouchAbility(this);
+            _Abilities.Add(_CrouchAbility);
         }
         void SetupStateMachine()
         {
             _Locomotion = new();
             var freelook = new FreeLookState(this);
             var strafe = new StrafeState(this);
-            _Locomotion.At(freelook, strafe, new FuncPredicate(()=> Input.Aim.IsPressed));
-            _Locomotion.At(strafe, freelook, new FuncPredicate(()=> !Input.Aim.IsPressed));
+            _Locomotion.At(freelook, strafe, new FuncPredicate(()=> _CurrentInput.Aim));
+            _Locomotion.At(strafe, freelook, new FuncPredicate(()=> !_CurrentInput.Aim));
             
             _Locomotion.SetState(_Locomotion.GetStateByType(typeof(FreeLookState)));
-            //if (_DebugStateMachine) _Locomotion.SetDebug(_DebugStateMachine);
         }
 
+        #region API for network
+
+        public bool IsCrouched => Motor.IsCrouched;
+        public void ApplyCrouch(bool crouched)
+        {
+            _CrouchAbility.Apply(crouched);
+        }
+        #endregion
     }
 }

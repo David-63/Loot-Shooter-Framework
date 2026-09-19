@@ -1,16 +1,12 @@
-# Changelog
-
-## 0.0.1
+## 0.0.2
 
 ### Added
 
-* Character movement architecture
-* Character movement component
-* Movement ability system
-* Movement policy system
-* FreeLook and Strafe movement policies
-* Character rotation handling through motor
+* Server-authoritative multiplayer architecture
+* Networked character movement and state synchronization
+* Unity Multiplayer Services and Relay integration
+* Server-side projectile simulation
 
 ### Notes
 
-This version establishes the character movement architecture using abilities and movement policies, separating movement decisions from motor execution and allowing different movement modes to share the same movement ability.
+This version establishes the multiplayer foundation on top of the existing character framework.

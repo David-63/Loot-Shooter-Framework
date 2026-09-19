@@ -11,6 +11,7 @@ namespace Dave6.LootShooter.Samples.Networking.UI
         NetworkSessionController _Session;
 
         Button _HostButton;
+        TextField _JoinCodeField;
         Button _ClientButton;
         Button _ShutdownButton;
         Label _StatusLabel;
@@ -30,6 +31,7 @@ namespace Dave6.LootShooter.Samples.Networking.UI
             if (_Session == null) return;
             ClearUI();
             _Session.OnStateChanged -= UpdateUI;
+            _Session.OnJoinCodeChanged -= UpdateJoinCode;
         }
 
         public void BindSession()
@@ -39,28 +41,60 @@ namespace Dave6.LootShooter.Samples.Networking.UI
             panel.RegisterUIReloadCallback(InitialUI);
 
             _Session.OnStateChanged += UpdateUI;
+            _Session.OnJoinCodeChanged += UpdateJoinCode;
         }
         void InitialUI(PanelRenderer renderer, VisualElement root)
         {
             _HostButton = CreateButton("HostButton", "Host");
+
+            _JoinCodeField = new TextField("Join Code") { name = "JoinCodeField" };
+            _JoinCodeField.style.width = 240;
+
             _ClientButton = CreateButton("ClientButton", "Client");
             _ShutdownButton = CreateButton("ShutdownButton", "Shutdown");
             _StatusLabel = CreateLabel("StatusLabel", "Not Connected");
 
-            _HostButton.clicked += _Session.StartHost;
-            _ClientButton.clicked += _Session.StartClient;
-            _ShutdownButton.clicked += _Session.Shutdown;
+            _HostButton.clicked += HandleHostButtonCliked;
+            _ClientButton.clicked += HandleClientButtonCliked;
+            _ShutdownButton.clicked += HandleShutdownButtonCliked;
 
             root.Add(_HostButton);
+            root.Add(_JoinCodeField);
             root.Add(_ClientButton);
             root.Add(_ShutdownButton);
             root.Add(_StatusLabel);
         }
         void ClearUI()
         {
-            _HostButton.clicked -= _Session.StartHost;
-            _ClientButton.clicked -= _Session.StartClient;
-            _ShutdownButton.clicked -= _Session.Shutdown;
+            _HostButton.clicked -= HandleHostButtonCliked;
+            _ClientButton.clicked -= HandleClientButtonCliked;
+            _ShutdownButton.clicked -= HandleShutdownButtonCliked;
+        }
+
+        async void HandleHostButtonCliked()
+        {
+            await _Session.CreateSessionAsync();
+        }
+        async void HandleClientButtonCliked()
+        {
+            string code = _JoinCodeField.value.Trim();
+            if (string.IsNullOrEmpty(code))
+            {
+                _StatusLabel.text = "Join code is empty.";
+                return;
+            }
+
+            // if (string.Equals(_Session.JoinCode, code))
+            // {
+            //     _StatusLabel.text = "Join code is incorrect.";
+            //     return;
+            // }
+
+            await _Session.JoinSessionAsync(code);
+        }
+        async void HandleShutdownButtonCliked()
+        {
+            await _Session.LeaveSessionAsync();
         }
         Button CreateButton(string name, string text)
         {
@@ -86,18 +120,25 @@ namespace Dave6.LootShooter.Samples.Networking.UI
             if (_Session.IsNetworkAvailable() == false)
             {
                 SetStartButtons(false);
+                _JoinCodeField.SetEnabled(true);
                 return;
             }
 
             if (!_Session.IsClient && !_Session.IsServer)
             {
                 SetStartButtons(true);
+                _JoinCodeField.SetEnabled(true);
             }
             else
             {
                 SetStartButtons(false);
+                _JoinCodeField.SetEnabled(!_Session.IsServer);
                 UpdateStatusLabels();
             }
+        }
+        void UpdateJoinCode(string code)
+        {
+            _JoinCodeField.value = $"{code}";
         }
 
 

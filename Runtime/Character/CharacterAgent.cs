@@ -1,7 +1,7 @@
 using Dave6.LootShooter.Camera;
+using Dave6.LootShooter.Character.Combat;
+using Dave6.LootShooter.Character.Movement;
 using Dave6.LootShooter.Character.Network;
-using Dave6.LootShooter.Character.States;
-using Dave6.LootShooter.Foundation.State;
 using Dave6.LootShooter.Input;
 using UnityEngine;
 
@@ -10,16 +10,20 @@ namespace Dave6.LootShooter.Character
     public sealed class CharacterAgent : MonoBehaviour
     {
         [SerializeField] bool _DebugStateMachine;
+        [SerializeField] Transform _ModelTransform;
+        public Transform Model => _ModelTransform;
         ICharacterInput _Input;
-        public ICharacterInput Input { get => _Input; }
         NetworkAgent _NetworkAgent;
         public NetworkAgent Network => _NetworkAgent;
         ThirdPersonCamera _Camera;
-        public ThirdPersonCamera Camera => _Camera;
 
         CharacterComponentManager _Components;
 
-        StateMachine _ActionSM;
+        public CharacterMovement Movement => _Components.Movement;
+        public CharacterCombat Combat => _Components.Combat;
+
+
+        //StateMachine _ActionSM;
 
         public void Initialize(ICharacterInput input, ThirdPersonCamera camera, ICharacterNetwork network)
         {
@@ -33,39 +37,26 @@ namespace Dave6.LootShooter.Character
             _Components = new CharacterComponentManager(this);
         }
 
-        void Start()
+        public void OnNetworkTick(PlayerInputData input, float deltaTime)
         {
-            SetupStateMachine();
+            _Components.OnUpdate(input, deltaTime);
         }
-        /*
-            1. StateMachine 생성
-            2. State 생성
-            3. Predicate 로 전환 조건 추가
-            4. SetState 로 현재 상태 초기화
-        */
-        void SetupStateMachine()
-        {
-            _ActionSM = new();
-            var idle = new IdleState(this);
-            var fire = new FireState(this);
-            _ActionSM.Any(fire, new FuncPredicate(()=> Input.Fire.IsPressed));
-            _ActionSM.At(fire, idle, new FuncPredicate(()=> Input.Fire.WasReleasedThisFrame));
 
-            _ActionSM.SetState(_ActionSM.GetStateByType(typeof(IdleState)));
-            if (_DebugStateMachine) _ActionSM.SetDebug(_DebugStateMachine);
-        }
-        void Update()
+        public PlayerInputData CreateInputData()
         {
-            if (_Input == null || _Camera == null) return;
-            _Components.OnUpdate();
-            //_LocomotionSM.Update();
-            //_ActionSM.Update();
+            return new PlayerInputData
+            {
+                Move = _Input.Move,
+                Jump = _Input.Jump.IsPressed,
+                Crouch = _Input.Crouch.IsPressed,
+                Sprint = _Input.Sprint.IsPressed,
+                Aim = _Input.Aim.IsPressed,
+                Fire = _Input.Fire.IsPressed,
+
+                CameraForward = _Camera.Forward,
+                CameraRight = _Camera.Right
+            };
         }
     }
-    public readonly struct MoverFrameInput
-    {
-        public readonly float DeltaTime;
-        public readonly float ReferenceYaw;
-        public readonly Vector3 CameraForward;
-    }
+    
 }

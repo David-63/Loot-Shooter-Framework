@@ -1,0 +1,14 @@
+{
+    "name": "Dave6.LootShooter.Gameplay",
+    "rootNamespace": "Dave6.LootShooter.Gameplay",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

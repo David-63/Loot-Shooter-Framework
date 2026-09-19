@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dave6.LootShooter.Camera;
 using Dave6.LootShooter.Character;
+using Dave6.LootShooter.Gameplay.Projectile;
 using Dave6.LootShooter.Input;
 using Dave6.LootShooter.Networking.Object;
 using Dave6.LootShooter.Networking.Spawn;
@@ -16,7 +17,8 @@ namespace Dave6.LootShooter.Networking.Runtime
     {
         ICharacterInput _CharacterInput;
         ThirdPersonCamera _LocalCamera;
-        ProjectileSpawnService _ProjectileService;
+        ProjectileSimulationManager _SimulationManager;
+        ProjectileVfxManager _VisualManager;
 
         readonly Dictionary<ulong, PlayerNetworkController> _Players = new();
         public IReadOnlyDictionary<ulong, PlayerNetworkController> Players => _Players;
@@ -28,11 +30,12 @@ namespace Dave6.LootShooter.Networking.Runtime
         public event Action<PlayerNetworkController> OnPlayerRegistered;
         public event Action<PlayerNetworkController> OnPlayerUnregistered;
 
-        public PlayerRuntime(ICharacterInput input, ThirdPersonCamera camera, ProjectileSpawnService projectileService)
+        public PlayerRuntime(ICharacterInput input, ThirdPersonCamera camera, ProjectileSimulationManager simulation, ProjectileVfxManager visual)
         {
             _CharacterInput = input;
             _LocalCamera = camera;
-            _ProjectileService = projectileService;
+            _SimulationManager = simulation;
+            _VisualManager = visual;
         }
 
         public void Dispose()
@@ -52,7 +55,7 @@ namespace Dave6.LootShooter.Networking.Runtime
             }
             _Players[player.OwnerClientId] = player;
 
-            player.Initialize(_ProjectileService);
+            player.Initialize(_SimulationManager, _VisualManager);
 
             if (player.IsOwner)
             {

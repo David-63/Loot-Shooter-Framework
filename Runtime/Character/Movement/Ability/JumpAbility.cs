@@ -5,9 +5,9 @@ namespace Dave6.LootShooter.Character.Movement.Ability
         readonly CharacterMovement _Movement;
         public JumpAbility(CharacterMovement movement) => _Movement = movement;
 
-        public void Execute()
+        public void Execute(PlayerInputData input)
         {
-            if (!_Movement.Input.Jump.WasPressedThisFrame) return;
+            if (!input.Jump) return;
             _Movement.Motor.TryJump();
         }
     }

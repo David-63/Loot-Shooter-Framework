@@ -9,6 +9,7 @@ namespace Dave6.LootShooter.Character.Motor
     {
         // Ground
         public bool IsGrounded;
+        public bool IsCrouched;
 
         public float BaseSpeed;
         public float TargetSpeed;
@@ -18,7 +19,8 @@ namespace Dave6.LootShooter.Character.Motor
         public float VerticalSpeed;
 
         // Movement
-        public Vector3 MoveDirection;
+        public Vector3 BaseMoveDirection;
+        public Vector3 TargetMoveDirection;
         public Vector3 Velocity;
 
 

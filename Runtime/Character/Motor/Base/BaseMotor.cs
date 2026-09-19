@@ -12,7 +12,7 @@ namespace Dave6.LootShooter.Character.Motor
         [SerializeField]
         protected BaseMotorConfig _Config;
 
-        CharacterController _Controller;
+        public CharacterController Controller { get; private set; }
         public PhysicsSensor GroundSensor { get; private set; }
 
         public bool IsGrounded => _Context.IsGrounded;
@@ -21,19 +21,18 @@ namespace Dave6.LootShooter.Character.Motor
         public Vector3 Velocity => _Context.Velocity;
         public float CurrentYaw => _Context.CurrentYaw;
 
+
+        public bool IsCrouched => _Context.IsCrouched;
+
+
         protected virtual void Awake()
         {
             Initialize();
         }
-        protected virtual void Update()
-        {
-            Simulate(Time.deltaTime);
-        }
-
         protected virtual void Initialize()
         {
-            _Context = new BaseMotorContext();
-            _Action = new BaseMotorAction(_Config);
+            _Context = new();
+            _Action = new(_Config);
 
             InitializeCharacterController();
             InitializeGroundSensor();
@@ -41,15 +40,15 @@ namespace Dave6.LootShooter.Character.Motor
 
         void InitializeCharacterController()
         {
-            _Controller = GetComponent<CharacterController>();
+            Controller = GetComponent<CharacterController>();
 
-            _Controller.height = _Config.Height;
-            _Controller.radius = _Config.Radius;
-            _Controller.center = _Config.Center;
+            Controller.height = _Config.Height;
+            Controller.radius = _Config.Radius;
+            Controller.center = _Config.Center;
 
-            _Controller.stepOffset = _Config.Height * _Config.StepHeightRatio;
+            Controller.stepOffset = _Config.Height * _Config.StepHeightRatio;
 
-            _Controller.skinWidth = _Config.Radius * 0.1f;
+            Controller.skinWidth = _Config.Radius * 0.1f;
         }
 
         void InitializeGroundSensor()
@@ -62,27 +61,25 @@ namespace Dave6.LootShooter.Character.Motor
             };
             GroundSensor.SetDirection(Vector3.down);
         }
-        protected virtual void Simulate(float deltaTime)
+        public virtual void Simulate(float deltaTime)
         {
-            _Action.UpdateGrounded(this, _Controller, _Context);
+            _Action.UpdateGrounded(this, Controller, _Context);
 
             _Action.UpdateGravity(_Context, deltaTime);
             _Action.UpdateSpeed(_Context, deltaTime);
-            _Action.UpdateRotation(_Controller, _Context, deltaTime);
+            _Action.UpdateRotation(Controller, _Context, deltaTime);
+            _Action.UpdateMoveDirection(_Context, deltaTime);
             _Action.UpdateVelocity(_Context);
 
-            _Controller.Move(_Context.Velocity * deltaTime);
+            Controller.Move(_Context.Velocity * deltaTime);
         }
 
         #region Motor API
         public void SetMoveDirection(Vector3 direction)
         {
-            if (direction.sqrMagnitude <= 0.0001f)
-            {
-                _Context.MoveDirection = Vector3.zero;
-                return;
-            }
-            _Context.MoveDirection = direction.normalized;
+            if (direction.sqrMagnitude <= 0.0001f) return;
+
+            _Context.TargetMoveDirection = direction.normalized;
         }
         public void SetTargetYaw(float yaw)
         {
@@ -101,8 +98,24 @@ namespace Dave6.LootShooter.Character.Motor
             _Action.Jump(_Context);
             return true;
         }
+        public void SetCrouch(bool crouched)
+        {
+            _Context.IsCrouched = crouched;
+
+            if (crouched)
+            {
+                Controller.height = 0.96f;
+                Controller.center = new Vector3(0, 0.48f, 0);
+            }
+            else
+            {
+                Controller.height = 1.6f;
+                Controller.center = new Vector3(0, 0.8f, 0);
+            }
+        }
         #endregion
     }
+}
 
     /*
         protected virtual void OnValidate()
@@ -151,4 +164,3 @@ namespace Dave6.LootShooter.Character.Motor
             return mask;
         }
     */
-}
